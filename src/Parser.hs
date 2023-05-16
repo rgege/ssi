@@ -9,7 +9,7 @@ import           Text.ParserCombinators.Parsec hiding (spaces)
 readExpr input =
   case parse parseExpr "List" input of
     Left err  -> "No match: " ++ show err
-    Right val -> show val
+    Right val -> "Found " ++ show val
 
 parseExpr :: Parser LispVal
 parseExpr =
