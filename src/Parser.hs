@@ -6,10 +6,11 @@ import           Numeric
 import           Syntax
 import           Text.ParserCombinators.Parsec hiding (spaces)
 
+readExpr :: String -> LispVal
 readExpr input =
-  case parse parseExpr "List" input of
-    Left err  -> "No match: " ++ show err
-    Right val -> "Found " ++ show val
+  case parse parseExpr "Lisp" input of
+    Left err  -> String $ "No match: " ++ show err
+    Right val -> val
 
 parseExpr :: Parser LispVal
 parseExpr =
