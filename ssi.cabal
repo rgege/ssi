@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      Eval
       Main
       Parser
       Syntax
@@ -42,6 +43,7 @@ library
 executable ssi-exe
   main-is: Main.hs
   other-modules:
+      Eval
       Parser
       Syntax
       Paths_ssi

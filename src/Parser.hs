@@ -28,9 +28,9 @@ parseExpr =
   <|> parseUnQuote
   <|> parseUnQuoteSplicing
   <|> do
-        char '('
+        _ <- char '('
         x <- try parseList <|> parseDottedList
-        char ')'
+        _ <- char ')'
         return x
 
 spaces :: Parser ()
@@ -41,13 +41,14 @@ symbol = oneOf "!$%&|*+-/:<=>?@^_~"
 
 parseString :: Parser LispVal
 parseString = do
-  char '\"'
+  _ <- char '\"'
   x <- many $ noneOf ['\\', '\"'] <|> escapedChar
-  char '\"'
+  _ <- char '\"'
   return $ String x
 
+escapedChar :: Parser Char
 escapedChar = do
-  char '\\'
+  _ <- char '\\'
   x <- oneOf ['\\', '\"', '\t', '\b', '\n', '\r', '\f']
   return x
 
@@ -74,32 +75,32 @@ parseNum = do
 
 parseDecimal :: Parser LispVal
 parseDecimal = do
-  try $ string "#d"
+  _ <- try $ string "#d"
   x <- many1 digit
   (return . Number . read) x
 
 parseOctal :: Parser LispVal
 parseOctal = do
-  try $ string "#o"
+  _ <- try $ string "#o"
   x <- many1 digit
   (return . Number . fst . head) $ readOct x
 
 parseHexadecimal :: Parser LispVal
 parseHexadecimal = do
-  try $ string "#x"
+  _ <- try $ string "#x"
   x <- many1 digit
   (return . Number . fst . head) $ readHex x
 
 parseBinary :: Parser LispVal
 parseBinary = do
-  try $ string "#b"
+  _ <- try $ string "#b"
   x <- many1 digit
   (return . Number . fst . head) $ readBin x
 
 parseFloat :: Parser LispVal
 parseFloat = do
   x <- many1 digit
-  char '.'
+  _ <- char '.'
   y <- many1 digit
   let fval = concat [x,".",y]
   (return . Float . fst . head) $ readFloat fval
@@ -107,7 +108,7 @@ parseFloat = do
 parseRational :: Parser LispVal
 parseRational = do
   x <- many digit
-  char '/'
+  _ <- char '/'
   y <- many digit
   let ratio = concat [x, "%", y]
   (return . Rational . read) ratio
@@ -115,28 +116,28 @@ parseRational = do
 parseComplex :: Parser LispVal
 parseComplex = do
   x <- many digit
-  char '+'
+  _ <- char '+'
   y <- many digit
-  char 'i'
+  _ <- char 'i'
   (return . Complex) $ (read x) :+ (read y)
 
 parseCharacter :: Parser LispVal
 parseCharacter = do
-  try $ string "#\\"
+  _ <- try $ string "#\\"
   val <- try $ string "newline" <|> string "space"
     <|> do { x <- anyChar ; notFollowedBy alphaNum ; return [x]}
   return $ Character $ case val of
     "newline" -> '\n'
     "space"   -> ' '
-    otherwise -> (head val)
+    _         -> (head val)
 
 parseBool :: Parser LispVal
 parseBool = do
-  char '#'
-  v <- oneOf ['t', 'f']
+  _ <- try $ char '#'
+  v <- try $ oneOf ['t', 'f']
   return $ case v of
     't' -> Bool True
-    'f' -> Bool False
+    _   -> Bool False
 
 parseList :: Parser LispVal
 parseList = do
@@ -145,39 +146,39 @@ parseList = do
 
 parseDottedList :: Parser LispVal
 parseDottedList = do
-  head <- endBy parseExpr spaces
-  tail <- char '.' >> spaces >> parseExpr
-  return $ DottedList head tail
+  h <- endBy parseExpr spaces
+  t <- char '.' >> spaces >> parseExpr
+  return $ DottedList h t
 
 parseQuoted :: Parser LispVal
 parseQuoted = do
-  char '\''
+  _ <- char '\''
   x <- parseExpr
   return $ List [Atom "quote", x]
 
 parseQuasiQuoted :: Parser LispVal
 parseQuasiQuoted = do
-  char '`'
+  _ <- char '`'
   x <- parseExpr
   return $ List [Atom "quasiquote", x]
 
 parseUnQuote :: Parser LispVal
 parseUnQuote = do
-  char ','
+  _ <- char ','
   x <- parseExpr
   return $ List [Atom "unquote", x]
 
 parseUnQuoteSplicing :: Parser LispVal
 parseUnQuoteSplicing = do
-     char ','
-     char '@'
+     _ <- char ','
+     _ <- char '@'
      x <- parseExpr
      return $ List [Atom "unquote-splicing", x]
 
 parseVector :: Parser LispVal
 parseVector = do
-  string "'#("
+  _ <- string "'#("
   arrVal <- sepBy parseExpr spaces
-  char ')'
+  _ <- char ')'
   return $ Vector $ listArray (0, (length arrVal - 1)) arrVal
 
