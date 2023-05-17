@@ -30,10 +30,11 @@ showVal (Bool True)         = "#t"
 showVal (Bool False)        = "#f"
 showVal (List contents)     = "(" ++ unwordsList contents ++ ")"
 showVal (DottedList h t)    = "(" ++ unwordsList h ++ " . " ++ show t ++ ")"
-showVal (Vector contents)   = show contents  -- "'#(" ++ unwordsList $ elems contents ++ ")"
+showVal (Vector contents)   = "'#(" ++ unwordsVector contents ++ ")"
 
 unwordsList :: [LispVal] -> String
 unwordsList = unwords . map showVal
 
-unwordsVector = showVal
+unwordsVector :: Array i LispVal -> String
+unwordsVector = unwordsList . elems
 
