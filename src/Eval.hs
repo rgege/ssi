@@ -10,7 +10,6 @@ eval val@(Float _)              = val
 eval val@(Rational _)           = val
 eval val@(Complex _)            = val
 eval val@(Bool _)               = val
-eval val@(List _)               = val
 eval val@(DottedList _ _)       = val
 eval val@(Vector _)             = val
 eval val@(Character _)          = val
