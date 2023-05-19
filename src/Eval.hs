@@ -32,16 +32,16 @@ primitives = [ ("+", numericBinop (+))
              , ("mod", numericBinop mod)
              , ("quotient", numericBinop quot)
              , ("remainder", numericBinop rem)
-             --, ("number?", unaryOp numPr)
-             --, ("string?", unaryOp strPr)
-             --, ("symbol?", unaryOp symPr)
+             , ("number?", unaryOp numPr)
+             , ("string?", unaryOp strPr)
+             , ("symbol?", unaryOp symPr)
              ]
 
 
 
 numericBinop :: (Integer -> Integer -> Integer) -> [LispVal] -> ThrowsError LispVal
-numericBinop op []            = throwError $ NumArgs 2 []
-numericBinop op singleVal@[_] = throwError $ NumArgs 2 singleVal
+numericBinop _ []            = throwError $ NumArgs 2 []
+numericBinop _ singleVal@[_] = throwError $ NumArgs 2 singleVal
 numericBinop op params        = mapM unpackNum params >>= return . Number . foldl1 op
 
 unpackNum :: LispVal -> ThrowsError Integer
@@ -53,13 +53,17 @@ unpackNum (String n) = let parsed = reads n in
 unpackNum (List [n]) = unpackNum n
 unpackNum notNum     = throwError $ TypeMismatch "number" notNum
 
---unaryOp :: (LispVal -> LispVal) -> [LispVal] -> ThrowsError LispVal
---unaryOp f params = head $ map f params
 
---numPr, strPr, symPr :: ThrowsError LispVal -> ThrowsError LispVal
---numPr (Number _) = Bool True
---numPr _          = Bool False
---strPr (String _) = Bool True
---strPr _          = Bool False
---symPr (Atom _) = Bool True
---symPr _        = Bool False
+unaryOp :: (LispVal -> ThrowsError LispVal) -> [LispVal] -> ThrowsError LispVal
+unaryOp _ []    = throwError $ NumArgs 1 []
+unaryOp f param
+  | length param > 1 = throwError $ NumArgs 1 param
+  | otherwise        = mapM f param >>= return . head
+
+numPr, strPr, symPr :: LispVal -> ThrowsError LispVal
+numPr (Number _) = return $ Bool True
+numPr _          = return $ Bool False
+strPr (String _) = return $ Bool True
+strPr _          = return $ Bool False
+symPr (Atom _) =   return $ Bool True
+symPr _        =   return $ Bool False
