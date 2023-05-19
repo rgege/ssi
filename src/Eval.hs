@@ -26,7 +26,10 @@ primitives = [ ("+", numericBinop (+))
              , ("/", numericBinop div)
              , ("mod", numericBinop mod)
              , ("quotient", numericBinop quot)
-             , ("remainder", numericBinop rem)]
+             , ("remainder", numericBinop rem)
+             , ("number?", unaryOp numPr)
+             , ("string?", unaryOp strPr)
+             , ("symbol?", unaryOp symPr) ]
 
 
 
@@ -41,3 +44,14 @@ unpackNum (String n) = let parsed = reads n :: [(Integer, String)] in
                               else fst $ parsed !! 0
 unpackNum (List [n]) = unpackNum n
 unpackNum _ = 0
+
+unaryOp :: (LispVal -> LispVal) -> [LispVal] -> LispVal
+unaryOp f [v] = f v
+
+numPr, strPr, symPr :: LispVal -> LispVal
+numPr (Number _) = Bool True
+numPr _          = Bool False
+strPr (String _) = Bool True
+strPr _          = Bool False
+symPr (Atom _  ) = Bool True
+symPr _          = Bool False
